@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <title>Casas de apuestas, colegios y rentas</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <!--
+    Para funcionar correctamente abre con un servidor local:
+      cd "Casas de apuestas"
+      python3 -m http.server 8000
+    Luego: http://localhost:8000/MAPA/
+  -->
+
+  <link href="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.css" rel="stylesheet" />
+  <script src="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.js"></script>
+  <script src="https://unpkg.com/pmtiles@3.0.6/dist/pmtiles.js"></script>
+  <script src="https://unpkg.com/@turf/turf@6/turf.min.js"></script>
+
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+  <!-- Mapa fijo en el fondo -->
+  <div id="map"></div>
+
+
+  <!-- ── MODO SCROLL (historia) ── -->
+  <div id="story">
+
+    <header class="story-header">
+      <span class="header-title">Casas de apuestas y centros educativos</span>
+      <div class="header-leyenda">
+        <span class="ley-item"><span class="ley-dot" style="background:#01f3b3"></span>Casa de apuestas</span>
+        <span class="ley-item"><span class="ley-dot" style="background:#494949"></span>Centros educativos</span>
+      </div>
+      <button id="entrar-ml-btn-header" class="header-ml-btn">Explorar mapa &rarr;</button>
+    </header>
+
+    <div id="steps-container">
+
+      <div class="step" data-scene="0">
+        <div class="card">
+          <h2>Más de 8.500 casas de apuestas y salones de juego</h2>
+          <p>Geolocalizadas una a una a través de Google Maps, cada punto verde representa un establecimiento de esta naturaleza.</p>
+          <p>En gris aparecen los centros educativos de todo el país. Corresponden a los centros del registro nacional que ofrece el Ministerio de Educación.</p>
+        </div>
+      </div>
+
+      <div class="step" data-scene="1">
+        <div class="card">
+          <h2>El 70% está a 250 metros o menos de un colegio</h2>
+          <p>Y casi la mitad, el <strong>40%</strong>, está a menos de 150 metros. La distancia mediana entre ellos es de 179 metros, una distancia muy pequeña que en muchos casos no cumple con la normativa de su comunidad autónoma.</p>
+          <div class="card-stat">
+            <span class="stat-num">179 m</span>
+            <span class="stat-label">distancia mediana al colegio más cercano</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="step" data-scene="1">
+        <div class="card">
+          <h2>Las comunidades fijan distancias mínimas</h2>
+          <p>Las comunidades autónomas fijan una distancia mínima entre casas de apuestas y centros educativos. Pero estas normas se aplican para obtener la licencia de <em>nuevos</em> locales.</p>
+          <p>En España <strong>XX locales</strong> no cumplen las distancias estipuladas en su respectivo reglamento, es decir, uno de cada dos establecimientos.</p>
+        </div>
+      </div>
+
+      <div class="step" data-scene="2">
+        <div class="card">
+          <h2>Valencia tiene la norma más restrictiva</h2>
+          <p>La Comunitat Valenciana es la segunda comunidad con más locales de apuestas (1.117) y la que tiene la norma más restrictiva. Su reglamento estipula que las casas de apuestas deben guardar una distancia mínima de 850 metros.</p>
+        </div>
+      </div>
+
+      <div class="step" data-scene="2">
+        <div class="card">
+          <h2>El margen más amplio, la tasa más alta</h2>
+          <p>Al ser la que tiene un margen más amplio también es la que tiene una tasa de incumplimiento más alta: el <strong>95,3%</strong> de sus locales está a menos de 850 metros de un centro educativo. La distancia mediana es de 170 metros.</p>
+          <div class="card-stat card-stat-warn">
+            <span class="stat-num">95,3%</span>
+            <span class="stat-label">de locales incumplen la distancia legal (850 m)</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="step" data-scene="3">
+        <div class="card">
+          <h2>Una norma laxa da mejores estadísticas</h2>
+          <p>Las comunidades que tienen el umbral de distancia más bajo son las que mejores datos tienen. Tiene lógica pensar que si la norma marca una distancia muy baja la tasa de incumplimiento disminuye porque no hay margen en el que ubicar las casas de apuestas.</p>
+        </div>
+      </div>
+
+      <div class="step" data-scene="4" data-umbral="100">
+        <div class="card">
+          <h2>Madrid: 100 metros de umbral, el 20% incumple</h2>
+          <p>Madrid tiene una distancia mínima de 100 metros. Aún así, el <strong>20%</strong> de sus locales está dentro de ese radio —a menos de 100 metros de un centro educativo—.</p>
+        </div>
+      </div>
+
+      <div class="step" data-scene="4" data-umbral="300">
+        <div class="card">
+          <h2>Si Madrid tuviera 300 metros...</h2>
+          <p>Con la media nacional de 300 metros como umbral, Madrid pasaría de un <strong>20% al 87%</strong> de locales incumpliendo la norma.</p>
+        </div>
+      </div>
+
+      <div class="step" data-scene="5" data-umbral="100">
+        <div class="card">
+          <h2>Asturias: también 100 metros, el 22% incumple</h2>
+          <p>Asturias fija el mismo umbral de 100 metros. El porcentaje de locales dentro de ese radio es del <strong>22%</strong>.</p>
+        </div>
+      </div>
+
+      <div class="step" data-scene="5" data-umbral="300">
+        <div class="card">
+          <h2>Si Asturias tuviera 300 metros...</h2>
+          <p>Asturias pasaría del <strong>22% al 71%</strong> de incumplimiento.</p>
+        </div>
+      </div>
+
+      <div class="step" data-scene="6" data-umbral="100">
+        <div class="card">
+          <h2>Cataluña: 100 metros, el 28% incumple</h2>
+          <p>Cataluña también limita a 100 metros. El <strong>28%</strong> de sus locales está a menos de esa distancia de un colegio.</p>
+        </div>
+      </div>
+
+      <div class="step" data-scene="6" data-umbral="300">
+        <div class="card">
+          <h2>Si Cataluña tuviera 300 metros...</h2>
+          <p>Cataluña pasaría del <strong>28% al 83%</strong> de incumplimiento.</p>
+        </div>
+      </div>
+
+      <div class="step" data-scene="7">
+        <div class="card">
+          <h2>17 locales en una sola manzana</h2>
+          <p>Esta es la sección censal con mayor concentración de casas de apuestas de toda España. En esta franja de Costa Adeje —Playa de las Américas, Tenerife— hay <strong>17 establecimientos</strong> de juego en un área de apenas unas manzanas.</p>
+        </div>
+      </div>
+
+      <div class="step" data-scene="7">
+        <div class="card">
+          <h2>La zona más pobre del polo turístico más rico</h2>
+          <p>La renta media de sus residentes es de 24.778 euros anuales, en el percentil <strong>7,2</strong> del país. Una de las zonas más pobres de España en términos de renta, dentro del mayor polo turístico de Canarias.</p>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- CTA al mapa libre -->
+    <div id="mapa-libre-cta">
+      <div class="cta-card">
+        <h3>Explora el mapa completo</h3>
+        <p>Filtra por cadena, activa el heatmap o busca tu barrio.</p>
+        <button id="entrar-ml-btn">Mapa libre &rarr;</button>
+      </div>
+    </div>
+
+  </div><!-- /#story -->
+
+  <!-- ── MODO LIBRE ── -->
+  <div id="ml-ui" class="hidden">
+
+    <header id="ml-header" class="story-header">
+      <span class="header-title">Casas de apuestas, colegios y rentas</span>
+      <div class="header-leyenda">
+        <span class="ley-item"><span class="ley-dot" style="background:#01f3b3"></span>Casa de apuestas</span>
+        <span class="ley-item"><span class="ley-dot" style="background:#494949"></span>Colegio</span>
+      </div>
+    </header>
+
+    <button id="volver-btn" class="ctrl-btn">&#8592; Volver</button>
+    <button id="reset-btn"  class="ctrl-btn">&#8635; Inicio</button>
+    <button id="filtro-btn"  class="ctrl-btn">Filtrar</button>
+
+    <div id="filtro-panel" class="filtro-panel hidden">
+      <div class="filtro-header">
+        <span class="filtro-titulo">Filtrar por cadena</span>
+        <div class="filtro-acciones">
+          <button id="filtro-todos">Todos</button>
+          <button id="filtro-ninguno">Ninguno</button>
+        </div>
+      </div>
+      <div id="filtro-lista" class="filtro-lista"></div>
+    </div>
+
+  </div><!-- /#ml-ui -->
+
+  <script src="app.js"></script>
+</body>
+</html>
