@@ -147,6 +147,24 @@
         </div>
       </div>
 
+      <div class="step" data-scene="8">
+        <div class="card">
+          <h2>La mayor aglomeración de España está en Vallecas</h2>
+          <p>Madrid es la ciudad con más locales de apuestas agrupados entre sí. <strong>365 establecimientos</strong> de la capital tienen otro a menos de 100 metros. La aglomeración más densa del país se encuentra en Puente de Vallecas.</p>
+        </div>
+      </div>
+
+      <div class="step" data-scene="8">
+        <div class="card">
+          <h2>Nueve locales en un radio de 100 metros</h2>
+          <p>En este tramo de Puente de Vallecas hay <strong>9 establecimientos</strong> de apuestas y juego en un área de apenas 100 metros: Luckia, Sportium, Alea Vallecas, Orenes, Wincity y varios salones independientes.</p>
+          <div class="card-stat card-stat-warn">
+            <span class="stat-num">9</span>
+            <span class="stat-label">locales en un radio de 100 metros</span>
+          </div>
+        </div>
+      </div>
+
     </div>
 
     <!-- CTA al mapa libre -->
@@ -171,9 +189,30 @@
       </div>
     </header>
 
-    <button id="volver-btn" class="ctrl-btn">&#8592; Volver</button>
-    <button id="reset-btn"  class="ctrl-btn">&#8635; Inicio</button>
-    <button id="filtro-btn"  class="ctrl-btn">Filtrar</button>
+    <button id="volver-btn"    class="ctrl-btn">&#8592; Volver</button>
+    <button id="reset-btn"     class="ctrl-btn">&#8635; Inicio</button>
+    <button id="filtro-btn"    class="ctrl-btn">Filtrar</button>
+    <button id="distancia-btn" class="ctrl-btn">Distancia</button>
+
+    <div id="distancia-panel" class="distancia-panel hidden">
+      <div class="distancia-header">
+        <span class="filtro-titulo">Radio al colegio más cercano</span>
+        <button id="distancia-reset">✕</button>
+      </div>
+      <div class="distancia-body">
+        <div class="distancia-valor-row">
+          <span id="distancia-valor" class="distancia-off">Desactivado</span>
+        </div>
+        <input type="range" id="distancia-slider" min="0" max="1500" step="25" value="0" />
+        <div class="distancia-escala">
+          <span>0 m</span><span>750 m</span><span>1500 m</span>
+        </div>
+        <div class="distancia-leyenda">
+          <span class="distancia-ley-item"><span class="distancia-dot" style="background:#ff4444"></span>Dentro del radio</span>
+          <span class="distancia-ley-item"><span class="distancia-dot" style="background:#01f3b3"></span>Fuera del radio</span>
+        </div>
+      </div>
+    </div>
 
     <div id="filtro-panel" class="filtro-panel hidden">
       <div class="filtro-header">

@@ -52,6 +52,11 @@ const SCENES = [
     center: [-16.732, 28.079], zoom: 14, duration: 2200,
     renta: false, seccion: true,
   },
+  {
+    // 8 — Puente de Vallecas (mayor aglomeración del país)
+    center: [-3.6679, 40.3972], zoom: 16, duration: 2200,
+    renta: false, clusterVallecas: true,
+  },
 ];
 
 /* ── Cadenas para el filtro en modo libre ── */
@@ -247,6 +252,24 @@ map.on('load', async () => { try {
     },
   });
 
+  /* ── Clúster Vallecas — círculo de 100 m ── */
+  const circleVallecas = turf.circle([-3.6679, 40.3972], 0.1, { steps: 64, units: 'kilometers' });
+  map.addSource('cluster-vallecas', { type: 'geojson', data: circleVallecas });
+  map.addLayer({
+    id: 'cluster-vallecas-fill',
+    type: 'fill',
+    source: 'cluster-vallecas',
+    layout: { visibility: 'none' },
+    paint: { 'fill-color': '#01f3b3', 'fill-opacity': 0.12 },
+  });
+  map.addLayer({
+    id: 'cluster-vallecas-line',
+    type: 'line',
+    source: 'cluster-vallecas',
+    layout: { visibility: 'none' },
+    paint: { 'line-color': '#01f3b3', 'line-width': 2, 'line-opacity': 0.9 },
+  });
+
   /* ════════════ SCROLL STORY ════════════ */
 
   const steps = document.querySelectorAll('.step');
@@ -293,6 +316,8 @@ map.on('load', async () => { try {
     map.setLayoutProperty('renta-colored', 'visibility', scene.renta ? 'visible' : 'none');
     map.setLayoutProperty('seccion-adeje-fill', 'visibility', scene.seccion ? 'visible' : 'none');
     map.setLayoutProperty('seccion-adeje-line', 'visibility', scene.seccion ? 'visible' : 'none');
+    map.setLayoutProperty('cluster-vallecas-fill', 'visibility', scene.clusterVallecas ? 'visible' : 'none');
+    map.setLayoutProperty('cluster-vallecas-line', 'visibility', scene.clusterVallecas ? 'visible' : 'none');
   }
 
   /* ════════════ COLOR POR UMBRAL ════════════ */
@@ -471,6 +496,9 @@ map.on('load', async () => { try {
     map.dragRotate.disable();
     map.setLayoutProperty('apuestas-heat', 'visibility', 'none');
     map.setLayoutProperty('apuestas-circle', 'visibility', 'visible');
+    distanciaSlider.value = 0;
+    actualizarSlider(0);
+    distanciaPanel.classList.add('hidden');
     escenaActual = -1;
     const activeStep = document.querySelector('.step .card.active')?.closest('.step');
     irAEscena(parseInt(activeStep?.dataset?.scene ?? '0', 10));
@@ -521,6 +549,42 @@ map.on('load', async () => { try {
   filtroBtn.addEventListener('click', e => { e.stopPropagation(); filtroPanel.classList.toggle('hidden'); });
   document.addEventListener('click', e => {
     if (!filtroPanel.contains(e.target) && e.target !== filtroBtn) filtroPanel.classList.add('hidden');
+  });
+
+  /* ════════════ SLIDER DISTANCIA ════════════ */
+
+  const distanciaBtn    = document.getElementById('distancia-btn');
+  const distanciaPanel  = document.getElementById('distancia-panel');
+  const distanciaSlider = document.getElementById('distancia-slider');
+  const distanciaValor  = document.getElementById('distancia-valor');
+  const distanciaReset  = document.getElementById('distancia-reset');
+
+  function actualizarSlider(val) {
+    if (val === 0) {
+      distanciaValor.textContent = 'Desactivado';
+      distanciaValor.classList.add('distancia-off');
+      resetearColor();
+    } else {
+      distanciaValor.textContent = val + ' m';
+      distanciaValor.classList.remove('distancia-off');
+      aplicarUmbral(val);
+    }
+  }
+
+  distanciaSlider.addEventListener('input', () => actualizarSlider(+distanciaSlider.value));
+
+  distanciaReset.addEventListener('click', () => {
+    distanciaPanel.classList.add('hidden');
+  });
+
+  distanciaBtn.addEventListener('click', e => {
+    e.stopPropagation();
+    distanciaPanel.classList.toggle('hidden');
+  });
+
+  document.addEventListener('click', e => {
+    if (!distanciaPanel.contains(e.target) && e.target !== distanciaBtn)
+      distanciaPanel.classList.add('hidden');
   });
 
 } catch(err) {
