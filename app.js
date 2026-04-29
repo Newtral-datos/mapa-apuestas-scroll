@@ -14,7 +14,7 @@ const DISTANCIAS_FILE = 'distancias.json';         // place_id → {d, n, t}
 const SCENES = [
   {
     // 0 — España completa
-    center: [-5.7, 36.2], zoom: 3.5, duration: 0,
+    center: [-5.7, 36.2], zoom: 4, duration: 0,
     renta: false,
   },
   {
@@ -475,7 +475,7 @@ map.on('load', async () => { try {
     map.dragPan.enable();
     map.dragRotate.enable();
     map.setLayoutProperty('renta-colored', 'visibility', 'none');
-    map.jumpTo({ center: [-5.7, 36.2], zoom: 3.5 });
+    map.jumpTo({ center: [-5.7, 36.2], zoom: 4 });
 
     if (!map._geocoderAdded) {
       map.addControl(new GeocoderControl(), 'top-right');
@@ -508,7 +508,7 @@ map.on('load', async () => { try {
 
   /* Reset */
   document.getElementById('reset-btn').addEventListener('click', () =>
-    map.flyTo({ center: [-5.7, 36.2], zoom: 3.5, duration: 1200 }));
+    map.flyTo({ center: [-5.7, 36.2], zoom: 4, duration: 1200 }));
 
   /* Filtro por cadena */
   const filtroBtn   = document.getElementById('filtro-btn');
