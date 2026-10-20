@@ -8,13 +8,19 @@ const APUESTAS_FILE   = 'GOOGLEMAPS_ES.pmtiles';   // source-layer: apuestas
 const RENTA_FILE      = 'RENTA_CASAS.pmtiles';     // source-layer: renta_casas
 const COLEGIOS_FILE   = 'colegios.geojson';        // GeoJSON directo (props: n, t, nat, loc, prov)
 const ESPANA_FILE     = 'espana.geojson';
-const DISTANCIAS_FILE = 'distancias.json';         // place_id → {d, n, t}
+const DISTANCIAS_FILE = 'distancias.json';        // place_id → {d, n, t}
+
+/* ── Mapa base: OpenFreeMap Positron (datos OSM, gratuito y sin API key) ──
+   Sustituye al Positron de CARTO, que desde 2025 exige clave y devuelve
+   tiles con marca de agua "API KEY REQUIRED". */
+const BASEMAP_STYLE = 'https://tiles.openfreemap.org/styles/positron';
+
 
 /* ── Escenas del scroll ── */
 const SCENES = [
   {
     // 0 — España completa
-    center: [-5.7, 36.2], zoom: 4, duration: 0,
+    center: [-5.7, 36.2], zoom: 3.5, duration: 0,
     renta: false,
   },
   {
@@ -73,7 +79,7 @@ const CADENAS = [
 
 const map = new maplibregl.Map({
   container: 'map',
-  style: { version: 8, sources: {}, layers: [] },
+  style: BASEMAP_STYLE,
   center: [-3.7, 40.2],
   zoom: 5.5,
   minZoom: 3,
@@ -117,15 +123,18 @@ map.on('load', async () => { try {
     .then(data => { distancias = data; })
     .catch(() => console.warn('distancias.json no disponible'));
 
-  /* ── Mapa base (CartoDB Positron) ── */
-  map.addSource('basemap', {
-    type: 'raster',
-    tiles: ['https://cartodb-basemaps-a.global.ssl.fastly.net/light_all/{z}/{x}/{y}{r}.png'],
-    tileSize: 256,
-    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> &copy; <a href="https://carto.com/">CARTO</a>',
-  });
-  map.addLayer({ id: 'basemap', type: 'raster', source: 'basemap',
-    paint: { 'raster-opacity': 1 } });
+  /* El mapa base ya viene cargado desde BASEMAP_STYLE (ver constante arriba).
+     Las capas que siguen se añaden encima de las del estilo. */
+
+  /* ── Etiquetas en español ──
+     El estilo rotula países y mares en inglés ("Spain", "Morocco").
+     OpenMapTiles incluye el campo name:es: lo usamos cuando existe.
+     Se ejecuta antes de añadir capas propias, así solo afecta al mapa base. */
+  for (const capa of map.getStyle().layers) {
+    if (capa.type !== 'symbol' || !capa.layout?.['text-field']) continue;
+    map.setLayoutProperty(capa.id, 'text-field',
+      ['coalesce', ['get', 'name:es'], ['get', 'name']]);
+  }
 
   /* ── Frontera de España ── */
   map.addSource('espana', { type: 'geojson', data: espana });
@@ -475,7 +484,7 @@ map.on('load', async () => { try {
     map.dragPan.enable();
     map.dragRotate.enable();
     map.setLayoutProperty('renta-colored', 'visibility', 'none');
-    map.jumpTo({ center: [-5.7, 36.2], zoom: 4 });
+    map.jumpTo({ center: [-5.7, 36.2], zoom: 3.5 });
 
     if (!map._geocoderAdded) {
       map.addControl(new GeocoderControl(), 'top-right');
@@ -508,7 +517,7 @@ map.on('load', async () => { try {
 
   /* Reset */
   document.getElementById('reset-btn').addEventListener('click', () =>
-    map.flyTo({ center: [-5.7, 36.2], zoom: 4, duration: 1200 }));
+    map.flyTo({ center: [-5.7, 36.2], zoom: 3.5, duration: 1200 }));
 
   /* Filtro por cadena */
   const filtroBtn   = document.getElementById('filtro-btn');
